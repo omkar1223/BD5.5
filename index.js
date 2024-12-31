@@ -191,3 +191,38 @@ app.get("/users/:id/liked", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+async function findByArtist(userId, artist) {
+  const result = await like.findAll({
+    where: { userId },
+    attribute: ["trackId"],
+  });
+  console.log(result);
+
+  let trackRecords = [];
+
+  for (i = 0; i < result.length; i++) {
+    trackRecords.push(result[i].trackId);
+  }
+  console.log(trackRecords);
+
+  const trackedArtist = await track.findAll({
+    where: { id: { [Op.in]: trackRecords }, artist },
+  });
+
+  console.log(trackedArtist);
+
+  return { trackedArtist };
+}
+
+app.get("/users/:id/liked-tracks", async (req, res) => {
+  const userId = parseInt(req.params.id);
+  const artist = req.query.artist;
+  try {
+    const response = await findByArtist(userId, artist);
+
+    return res.status(200).json(response);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
