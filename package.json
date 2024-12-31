@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "@sequelize/core": "^7.0.0-alpha.43",
+    "@types/node": "^22.10.2",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "node-fetch": "^3.3.2",
+    "sequelize": "^6.37.5",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7"
+  }
+}
