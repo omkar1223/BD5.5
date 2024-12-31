@@ -81,6 +81,27 @@ app.get("/tracks", async (req, res) => {
   res.status(200).json(response);
 });
 
+async function addNewUser(newUser) {
+  const result = await user.create(newUser);
+  return { result };
+}
+
+app.post("/users/new", async (req, res) => {
+  const newUser = req.body.newUser;
+  try {
+    const response = await addNewUser(newUser);
+    if (response.result === null) {
+      return res.status(404).json({ message: "User already exists" });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "User added sucessfully", response });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.get("/users", async (req, res) => {
   const response = await user.findAll();
   res.status(200).json(response);
@@ -139,4 +160,34 @@ app.get("/users/:id/dislike", async (req, res) => {
 app.get("/likes", async (req, res) => {
   const result = await like.findAll();
   res.status(200).json({ likes: result });
+});
+
+async function userLikedTracks(userId) {
+  const trackIds = await like.findAll({
+    where: { userId },
+    attribute: ["trackId"],
+  });
+
+  let trackArray = [];
+
+  for (let i = 0; i < trackIds.length; i++) {
+    trackArray.push(trackIds[i].trackId);
+  }
+
+  let tracks = await track.findAll({ where: { id: { [Op.in]: trackArray } } });
+
+  return { tracks };
+}
+
+app.get("/users/:id/liked", async (req, res) => {
+  const userId = parseInt(req.params.id);
+  try {
+    const response = await userLikedTracks(userId);
+    if (response.tracks.length === 0) {
+      return res.status(404).json({ message: "No liked Tracks found" });
+    }
+    return res.status(200).json(response);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
